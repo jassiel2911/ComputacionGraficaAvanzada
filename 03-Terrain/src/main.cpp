@@ -89,6 +89,15 @@ Model modelBuzzHead;
 Model modelBuzzLeftArm;
 Model modelBuzzLeftForeArm;
 Model modelBuzzLeftHand;
+// Modelos animados
+// Mayow
+Model mayowModelAnimate;
+// Cowboy
+Model cowboyModelAnimate;
+// Guardian con lampara
+Model guardianModelAnimate;
+// Cybog
+Model cyborgModelAnimate;
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint skyboxTextureID;
@@ -120,7 +129,12 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixBuzz = glm::mat4(1.0f);
+glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixCowboy = glm::mat4(1.0f);
+glm::mat4 modelMatrixGuardian = glm::mat4(1.0f);
+glm::mat4 modelMatrixCyborg = glm::mat4(1.0f);
 
+int animationMayowIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 float rotBuzzHead = 0.0, rotBuzzLeftarm = 0.0, rotBuzzLeftForeArm = 0.0, rotBuzzLeftHand = 0.0;
 int modelSelected = 0;
@@ -331,6 +345,22 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelBuzzLeftForeArm.setShader(&shaderMulLighting);
 	modelBuzzLeftHand.loadModel("../models/buzz/buzzlightyLeftHand.obj");
 	modelBuzzLeftHand.setShader(&shaderMulLighting);
+
+	// Mayow
+	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
+	mayowModelAnimate.setShader(&shaderMulLighting);
+	
+	// Cowboy
+	cowboyModelAnimate.loadModel("../models/cowboy/Character Running.fbx");
+	cowboyModelAnimate.setShader(&shaderMulLighting);
+
+	// Guardian
+	guardianModelAnimate.loadModel("../models/boblampclean/boblampclean.md5mesh");
+	guardianModelAnimate.setShader(&shaderMulLighting);
+
+	// Cyborg
+	cyborgModelAnimate.loadModel("../models/cyborg/cyborg.fbx");
+	cyborgModelAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	
@@ -543,6 +573,10 @@ void destroy() {
 	modelBuzzLeftForeArm.destroy();
 	modelBuzzLeftHand.destroy();
 	modelBuzzTorso.destroy();
+	mayowModelAnimate.destroy();
+	cowboyModelAnimate.destroy();
+	guardianModelAnimate.destroy();
+	cyborgModelAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -748,6 +782,23 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		modelMatrixBuzz = glm::translate(modelMatrixBuzz, glm::vec3(0.0, 0.0, -0.02));
 
+	// Controles de mayow
+	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, 0.02f, glm::vec3(0, 1, 0));
+		animationMayowIndex = 0;
+	} else if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+		modelMatrixMayow = glm::rotate(modelMatrixMayow, -0.02f, glm::vec3(0, 1, 0));
+		animationMayowIndex = 0;
+	}
+	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, 0.02));
+		animationMayowIndex = 0;
+	}
+	else if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0, 0.0, -0.02));
+		animationMayowIndex = 0;
+	}
+
 	glfwPollEvents();
 	return continueApplication;
 }
@@ -776,6 +827,16 @@ void applicationLoop() {
 	modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(3.0, 0.0, 20.0));
 
 	modelMatrixBuzz = glm::translate(modelMatrixBuzz, glm::vec3(15.0, 0.0, -10.0));
+
+	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
+	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+	modelMatrixCowboy = glm::translate(modelMatrixCowboy, glm::vec3(13.0, 0.05, 0.0));
+
+	modelMatrixGuardian = glm::translate(modelMatrixGuardian, glm::vec3(15, 0.05, 0.0));
+	modelMatrixGuardian = glm::rotate(modelMatrixGuardian, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+
+	modelMatrixCyborg = glm::translate(modelMatrixCyborg, glm::vec3(5.0f, 0.05, 0.0f));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -842,6 +903,7 @@ void applicationLoop() {
 		 *******************************************/
 		shaderMulLighting.setInt("pointLightCount", 0);
 
+
 		/*******************************************
 		 * Cesped
 		 *******************************************/
@@ -854,117 +916,6 @@ void applicationLoop() {
 		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(200, 200)));
 		boxCesped.render(modelCesped);
 		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		/*******************************************
-		 * Casa
-		 *******************************************/
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureWallID);
-		// Frontal wall
-		boxWalls.setScale(glm::vec3(10.0, 5.0, 0.05));
-		boxWalls.setPosition(glm::vec3(-10.0, 2.5, 0.0));
-		boxWalls.setOrientation(glm::vec3(0.0, 0.0, 0.0));
-		boxWalls.render();
-		// Left wall
-		boxWalls.setScale(glm::vec3(10.0, 5.0, 0.05));
-		boxWalls.setPosition(glm::vec3(-15.0, 2.5, -5.0));
-		boxWalls.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		boxWalls.render();
-		// Right walls
-		// First wall
-		boxWalls.setScale(glm::vec3(3.75, 5.0, 0.05));
-		boxWalls.setPosition(glm::vec3(-5.0, 2.5, -1.875));
-		boxWalls.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		boxWalls.render();
-		// Second wall
-		boxWalls.setScale(glm::vec3(3.75, 5.0, 0.05));
-		boxWalls.setPosition(glm::vec3(-5.0, 2.5, -8.125));
-		boxWalls.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		boxWalls.render();
-		// Third wall
-		boxWalls.setScale(glm::vec3(2.5, 1.25, 0.05));
-		boxWalls.setPosition(glm::vec3(-5.0, 4.375, -5.0));
-		boxWalls.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		boxWalls.render();
-		// Four wall
-		boxWalls.setScale(glm::vec3(2.5, 1.25, 0.05));
-		boxWalls.setPosition(glm::vec3(-5.0, 0.625, -5.0));
-		boxWalls.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		boxWalls.render();
-		// Back wall
-		boxWalls.setScale(glm::vec3(10.0, 5.0, 0.05));
-		boxWalls.setPosition(glm::vec3(-10.0, 2.5, -10.0));
-		boxWalls.setOrientation(glm::vec3(0.0, 0.0, 0.0));
-		boxWalls.render();
-		// Ceilling
-		boxWalls.setScale(glm::vec3(12.0, 12.0, 0.05));
-		boxWalls.setPosition(glm::vec3(-10.0, 5, -5.0));
-		boxWalls.setOrientation(glm::vec3(90.0, 0.0, 0.0));
-		boxWalls.render();
-		// Window
-		glBindTexture(GL_TEXTURE_2D, textureWindowID);
-		boxWalls.setScale(glm::vec3(2.5, 2.5, 0.05));
-		boxWalls.setPosition(glm::vec3(-5.0, 2.5, -5.0));
-		boxWalls.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		boxWalls.render();
-		// Highway 0
-		glBindTexture(GL_TEXTURE_2D, textureHighwayID);
-		boxHighway.setScale(glm::vec3(40.0, 0.05, 10.0));
-		boxHighway.setPosition(glm::vec3(0.0, 0.05, 10.0));
-		boxHighway.setOrientation(glm::vec3(0.0, 0.0, 0.0));
-		boxHighway.render();
-		// Highway 1
-		boxHighway.setScale(glm::vec3(80.0, 0.05, 10.0));
-		boxHighway.setPosition(glm::vec3(25.0, 0.05, 0.0));
-		boxHighway.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(2, 1)));
-		boxHighway.render();
-		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
-		// Highway 2
-		boxHighway.setScale(glm::vec3(80.0, 0.05, 10.0));
-		boxHighway.setPosition(glm::vec3(-25.0, 0.05, 0.0));
-		boxHighway.setOrientation(glm::vec3(0.0, 90.0, 0.0));
-		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(2, 1)));
-		boxHighway.render();
-		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(0, 0)));
-		// Highway 3
-		boxHighway.setScale(glm::vec3(40.0, 0.05, 10.0));
-		boxHighway.setPosition(glm::vec3(0.0, 0.05, -35.0));
-		boxHighway.setOrientation(glm::vec3(0.0, 0.0, 0.0));
-		boxHighway.render();
-
-		/*******************************************
-		 * Esfera 1
-		*********************************************/
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureHighwayID);
-		shaderMulLighting.setInt("texture1", 0);
-		esfera1.setScale(glm::vec3(3.0, 3.0, 3.0));
-		esfera1.setPosition(glm::vec3(3.0f, 2.0f, -10.0f));
-		esfera1.render();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureWallID);
-		shaderMulLighting.setInt("texture1", 0);
-		esfera1.setScale(glm::vec3(10.0, 10.0, 10.0));
-		esfera1.setPosition(glm::vec3(3.0f, 2.0f, 10.0f));
-		esfera1.enableWireMode();
-		esfera1.render();
-		esfera1.enableFillMode();
-
-		/******************************************
-		 * Landing pad
-		*******************************************/
-		boxLandingPad.setScale(glm::vec3(10.0f, 0.05f, 10.0f));
-		boxLandingPad.setPosition(glm::vec3(5.0f, 0.05f, -5.0f));
-		boxLandingPad.setOrientation(glm::vec3(0.0f, 0.0f, 0.0f));
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureLandingPadID);
-		shaderMulLighting.setInt("texture1", 0);
-		//shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(2.0, 2.0)));
-		boxLandingPad.render();
-		//shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(1.0, 1.0)));
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		/*******************************************
@@ -1111,6 +1062,28 @@ void applicationLoop() {
 		modelMatrixLeftHand = glm::rotate(modelMatrixLeftHand, glm::radians(-45.0f), glm::vec3(0, 1, 0));
 		modelMatrixLeftHand = glm::translate(modelMatrixLeftHand, glm::vec3(-0.416066, -0.587046, -0.076258));
 		modelBuzzLeftHand.render(modelMatrixLeftHand);
+
+		/*****************************************
+		 * Objetos animados por huesos
+		 * **************************************/
+		glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
+		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021f));
+		mayowModelAnimate.setAnimationIndex(animationMayowIndex);
+		mayowModelAnimate.render(modelMatrixMayowBody);
+		animationMayowIndex = 1;
+
+		glm::mat4 modelMatrixCowboyBody = glm::mat4(modelMatrixCowboy);
+		modelMatrixCowboyBody = glm::scale(modelMatrixCowboyBody, glm::vec3(0.0021f));
+		cowboyModelAnimate.render(modelMatrixCowboyBody);
+
+		glm::mat4 modelMatrixGuardianBody = glm::mat4(modelMatrixGuardian);
+		modelMatrixGuardianBody = glm::scale(modelMatrixGuardianBody, glm::vec3(0.04f));
+		guardianModelAnimate.render(modelMatrixGuardianBody);
+
+		glm::mat4 modelMatrixCyborgBody = glm::mat4(modelMatrixCyborg);
+		modelMatrixCyborgBody = glm::scale(modelMatrixCyborgBody, glm::vec3(0.009f));
+		cyborgModelAnimate.setAnimationIndex(1);
+		cyborgModelAnimate.render(modelMatrixCyborgBody);
 
 		/*******************************************
 		 * Skybox
